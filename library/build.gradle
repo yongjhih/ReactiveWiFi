@@ -34,3 +34,6 @@ task wrapper(type: Wrapper) {
 }
 
 apply from: '../maven_push.gradle'
+apply from: 'javadoc.gradle'
+apply plugin: 'com.github.dcendents.android-maven'
+apply from: 'jacoco.gradle'
