@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pwittchen.reactivewifi;
+package com.github.pwittchen.reactivewifi2;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,15 +24,17 @@ import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Looper;
+
 import java.util.List;
-import rx.Observable;
-import rx.Scheduler;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Func1;
-import rx.subscriptions.Subscriptions;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
+import io.reactivex.functions.Function;
 
 /**
  * ReactiveWiFi is an Android library
@@ -57,8 +59,8 @@ public class ReactiveWifi {
     filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
     filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
 
-    return Observable.create(new Observable.OnSubscribe<List<ScanResult>>() {
-      @Override public void call(final Subscriber<? super List<ScanResult>> subscriber) {
+    return Observable.create(new ObservableOnSubscribe<List<ScanResult>>() {
+      @Override public void subscribe(final ObservableEmitter<List<ScanResult>> subscriber) {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
           @Override public void onReceive(Context context, Intent intent) {
             wifiManager.startScan(); // we need to start scan again to get fresh results ASAP
@@ -68,8 +70,8 @@ public class ReactiveWifi {
 
         context.registerReceiver(receiver, filter);
 
-        subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
+        subscriber.setDisposable(unsubscribeInUiThread(new Runnable() {
+          @Override public void run() {
             context.unregisterReceiver(receiver);
           }
         }));
@@ -86,8 +88,8 @@ public class ReactiveWifi {
    */
   public Observable<WifiSignalLevel> observeWifiSignalLevel(final Context context) {
     return observeWifiSignalLevel(context, WifiSignalLevel.getMaxLevel()).map(
-        new Func1<Integer, WifiSignalLevel>() {
-          @Override public WifiSignalLevel call(Integer level) {
+        new Function<Integer, WifiSignalLevel>() {
+          @Override public WifiSignalLevel apply(Integer level) {
             return WifiSignalLevel.fromLevel(level);
           }
         });
@@ -106,8 +108,8 @@ public class ReactiveWifi {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
 
-    return Observable.create(new Observable.OnSubscribe<Integer>() {
-      @Override public void call(final Subscriber<? super Integer> subscriber) {
+    return Observable.create(new ObservableOnSubscribe<Integer>() {
+      @Override public void subscribe(final ObservableEmitter<Integer> subscriber) {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
           @Override public void onReceive(Context context, Intent intent) {
             final int rssi = wifiManager.getConnectionInfo().getRssi();
@@ -118,8 +120,8 @@ public class ReactiveWifi {
 
         context.registerReceiver(receiver, filter);
 
-        subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
+        subscriber.setDisposable(unsubscribeInUiThread(new Runnable() {
+          @Override public void run() {
             context.unregisterReceiver(receiver);
           }
         }));
@@ -139,8 +141,8 @@ public class ReactiveWifi {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 
-    return Observable.create(new Observable.OnSubscribe<SupplicantState>() {
-      @Override public void call(final Subscriber<? super SupplicantState> subscriber) {
+    return Observable.create(new ObservableOnSubscribe<SupplicantState>() {
+      @Override public void subscribe(final ObservableEmitter<SupplicantState> subscriber) {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
           @Override public void onReceive(Context context, Intent intent) {
             SupplicantState supplicantState =
@@ -154,8 +156,8 @@ public class ReactiveWifi {
 
         context.registerReceiver(receiver, filter);
 
-        subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
+        subscriber.setDisposable(unsubscribeInUiThread(new Runnable() {
+          @Override public void run() {
             context.unregisterReceiver(receiver);
           }
         }));
@@ -175,8 +177,8 @@ public class ReactiveWifi {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 
-    return Observable.create(new Observable.OnSubscribe<WifiInfo>() {
-      @Override public void call(final Subscriber<? super WifiInfo> subscriber) {
+    return Observable.create(new ObservableOnSubscribe<WifiInfo>() {
+      @Override public void subscribe(final ObservableEmitter<WifiInfo> subscriber) {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
           @Override public void onReceive(Context context, Intent intent) {
             SupplicantState supplicantState =
@@ -189,8 +191,8 @@ public class ReactiveWifi {
 
         context.registerReceiver(receiver, filter);
 
-        subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
+        subscriber.setDisposable(unsubscribeInUiThread(new Runnable() {
+          @Override public void run() {
             context.unregisterReceiver(receiver);
           }
         }));
@@ -198,17 +200,17 @@ public class ReactiveWifi {
     });
   }
 
-  private Subscription unsubscribeInUiThread(final Action0 unsubscribe) {
-    return Subscriptions.create(new Action0() {
-      @Override public void call() {
+  private Disposable unsubscribeInUiThread(final Runnable unsubscribe) {
+    return Disposables.fromRunnable(new Runnable() {
+      @Override public void run() {
         if (Looper.getMainLooper() == Looper.myLooper()) {
-          unsubscribe.call();
+          unsubscribe.run();
         } else {
           final Scheduler.Worker inner = AndroidSchedulers.mainThread().createWorker();
-          inner.schedule(new Action0() {
-            @Override public void call() {
-              unsubscribe.call();
-              inner.unsubscribe();
+          inner.schedule(new Runnable() {
+            @Override public void run() {
+              unsubscribe.run();
+              inner.dispose();
             }
           });
         }

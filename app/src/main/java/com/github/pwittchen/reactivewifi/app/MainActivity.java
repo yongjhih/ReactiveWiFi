@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pwittchen.reactivewifi.app;
+package com.github.pwittchen.reactivewifi2.app;
 
 import android.Manifest;
 import android.app.Activity;
@@ -27,8 +27,8 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.github.pwittchen.reactivewifi.ReactiveWifi;
-import com.github.pwittchen.reactivewifi.WifiSignalLevel;
+import com.github.pwittchen.reactivewifi2.ReactiveWifi;
+import com.github.pwittchen.reactivewifi2.WifiSignalLevel;
 import java.util.ArrayList;
 import java.util.List;
 import rx.Subscription;
