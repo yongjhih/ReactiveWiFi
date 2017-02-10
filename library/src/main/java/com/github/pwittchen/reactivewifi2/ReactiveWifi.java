@@ -25,8 +25,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.support.annotation.RequiresPermission;
 import android.os.Looper;
-import android.Manifest;
-
+import android.Manifest.permission.ACCESS_FINE_LOCATION;
+import android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -53,7 +53,7 @@ public class ReactiveWifi {
    * @param context Context of the activity or an application
    * @return RxJava Observable with list of WiFi scan results
    */
-  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+  @RequiresPermission(anyOf = {ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION})
   public Observable<List<ScanResult>> observeWifiAccessPoints(final Context context) {
     final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     wifiManager.startScan(); // without starting scan, we may never receive any scan results
@@ -89,7 +89,7 @@ public class ReactiveWifi {
    * @param context Context of the activity or an application
    * @return WifiSignalLevel as an enum
    */
-  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+  @RequiresPermission(anyOf = {ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION})
   public Observable<WifiSignalLevel> observeWifiSignalLevel(final Context context) {
     return observeWifiSignalLevel(context, WifiSignalLevel.getMaxLevel()).map(
         new Function<Integer, WifiSignalLevel>() {
@@ -107,7 +107,7 @@ public class ReactiveWifi {
    * @param numLevels The number of levels to consider in the calculated level as Integer
    * @return RxJava Observable with WiFi signal level
    */
-  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+  @RequiresPermission(anyOf = {ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION})
   public Observable<Integer> observeWifiSignalLevel(final Context context, final int numLevels) {
     final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     final IntentFilter filter = new IntentFilter();
@@ -142,7 +142,7 @@ public class ReactiveWifi {
    * @param context Context of the activity or an application
    * @return RxJava Observable with SupplicantState
    */
-  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+  @RequiresPermission(anyOf = {ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION})
   public Observable<SupplicantState> observeSupplicantState(final Context context) {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
@@ -178,7 +178,7 @@ public class ReactiveWifi {
    * @param context Context of the activity or an application
    * @return RxJava Observable with WifiInfo
    */
-  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+  @RequiresPermission(anyOf = {ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION})
   public Observable<WifiInfo> observeWifiAccessPointChanges(final Context context) {
     final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     final IntentFilter filter = new IntentFilter();
